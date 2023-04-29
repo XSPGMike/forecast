@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forecasts/common.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Leaderboard</title>
+  </head>
+  <body>
+    <div class="outer">
+    <div class="container">
+      <a class="darker" href="{% url 'index' %}">Home</a>
+      {% for other_year in years %}
+        <a class="darker" href="/users/leaderboard/?year={{ other_year }}">{{ other_year }}</a>
+      {% endfor %}
+      <table>
+        <tr>
+          <th>User</th>
+          <th>Raw score</th>
+          <th>Weighted score</th>
+          <th>Count</th>
+        </tr>
+        {% for idx, user in users %}
+        <tr
+          style="color: {% if idx == 0 %}#FFD700{% elif idx == 1 %}#C0C0C0{% elif idx == 2 %}#CD7F32{% endif %};"
+        >
+          <td>{{ user.username }}</td>
+          <td>{{ user.raw_score }}</td>
+          <td>{{ user.score }}</td>
+          <td>{{ user.count }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      <ul>
+      </ul>
+    </div>
+    </div>
+  </body>
+</html>

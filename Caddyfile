@@ -1,0 +1,10 @@
+forecast.archiviazzo.ninja {
+        handle_path /static* {
+                file_server {
+                        root home/mike/appdata/new_forecast/static
+                }
+        }
+        handle {
+                reverse_proxy localhost:8000
+        }
+}

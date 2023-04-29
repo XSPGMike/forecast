@@ -1,0 +1,12 @@
+{% if error %}
+  <p>{{ error }}</p>
+{% endif %}
+
+<form action="{% url 'register' %}" method="post">
+  {% csrf_token %}
+  <input type="text" name="username"></input>
+  <input type="email" name="username"></input>
+  <input type="password" name="password"></input>
+  <input type="submit"></input>
+</form>
+<a href="/users/forgot">forgot password</a>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create forecast</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forecasts/common.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div class="container">
+    <h2 class="author">Create forecast</h2>
+    <form action="{% url 'new' %}" method="post">
+      {% csrf_token %}
+      {% if error_message %}
+        <p class="red">{{ error_message }}</p>
+      {% endif %}
+      <input type="date" name="deadline" placeholder="yyyy-mm-dd" min="{{ today }}">
+      <input type="text" name="title" placeholder="title">
+      <textarea name="description" placeholder="description"></textarea>
+      <input type="checkbox" name="is_private">Show guesses only after the forecast ended</input>
+      <input type="submit" value="create">
+    </form>
+    </div>
+  </body>
+</html>

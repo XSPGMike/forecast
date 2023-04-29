@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forecasts/common.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forecast Legends</title>
+  </head>
+  <body>
+<div class="head">
+  <h1>Forecast Legends</h1>
+  <div>
+  {% if user.is_authenticated %}
+  <a class="author" href="{% url 'new' %}">create forecast</a>
+    <div class="links">
+      <a class="gold" href="/users/leaderboard?year={{ year }}">leaderboard</a>
+      {% if archive %}
+      <a class="darker" href="{% url 'index' %}">home</a>
+      {%else%}
+      <a class="darker" href="{% url 'archive' %}">archive</a>
+      {%endif%}
+      <a class="darker" href="/users/profile">{{ user.username }}</a>
+      <a class="red" href="/users/logout">logout</a>
+    </div>
+  {% else %}
+    <a class="author" href="/users/login">login</a>
+    <a class="gold" href="/users/leaderboard?year={{ year }}">leaderboard</a>
+  {% endif %}
+  </div>
+</div>
+<div class="outer">
+<ul>
+  {% for forecast in forecasts %}
+  <a href="/forecasts/{{ forecast.uuid }}">
+    <li class="{{ forecast.expired|yesno:'expired,' }}">
+      <div>
+        <p>{{ forecast }}</p>
+        <p class="{{ forecast.expired|yesno:'red, author'}}"><b>{{ forecast.created_by }}</b>
+        {% if forecast.private %}
+        <span class="private">{{ forecast.private|yesno:'private,' }}</span>
+        {% endif %}
+        </p>
+        <p><span class="darker">deadline: </span>{{ forecast.deadline | date:'d-m-Y' }}</p>
+        <p><span class="darker">votes: </span>{{ forecast.vote_count }}</p>
+        {% if forecast.vote_avg and not forecast.expired %}
+        <p><span class="darker">consensus: </span><span class="gold">{{ forecast.vote_avg }}%</span></p>
+        {%elif forecast.expired and not archive %}
+        <p><span class="red">expired: tell {{ forecast.created_by }} to end it!</span></p>
+        {%elif not archive %}
+        <p><span class="author">vote now!</span></p>
+        {%else%}
+        <p><span class="darker">outcome: </span>{{ forecast.outcome|yesno:'It happened,It didn\'t happen' }}</p>
+        {%endif%}
+      </div>
+    </li>
+  </a>
+  {% endfor %}
+</ul>
+</div>
+  </body>
+</html>

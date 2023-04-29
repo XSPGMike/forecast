@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'forecasts/common.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forecast Legends</title>
+  </head>
+  <body>
+    <div class="container">
+      <a class="darker"href="{% url 'index' %}">home</a>
+      <h2 class="{{ forecast.expired|yesno:'red,author' }}">
+        {{ forecast.title }} </h2>
+      {% if forecast.expired and not forecast.ended %}
+        <p class="red">This forecast has expired!</p>
+      {% elif forecast.ended %}
+        <p class="red">This forecast has ended!</p>
+      {% endif %}
+      {% if forecast.description %}
+      <p> {{ forecast.description }} </p>
+      {% endif %}
+      <p> <span class="darker"> deadline: </span>{{ forecast.deadline | date:'d-m-Y' }} </p> 
+      <p> <span class="darker">count: </span>{{ forecast.vote_count }} </p> 
+
+      {% if forecast.vote_avg %}
+      <p> <span class="darker">consensus: </span><span class="gold">{{ forecast.vote_avg }}%</span></p> 
+      {% endif %}
+
+      {% if forecast.ended %}
+        <p> <span class="darker">outcome: </span>{{ forecast.outcome|yesno:'It happened,It didn\'t happen' }}</p>
+      {% endif %}
+
+
+      {% if forecast.expired %}
+        {% if forecast.created_by == user and forecast.outcome == None %}
+          <form action="{% url 'end' forecast.uuid %}" method="post">
+            {% csrf_token %}
+            <p style="margin: 0px;">Did it happen?</p>
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="radio" name="outcome" value="1"> Yes
+            <input type="radio" name="outcome" value="0"> No
+            </div>
+            <input type="submit" value="End">
+          </form>
+        {% endif %}
+      {% elif user.is_authenticated %}
+        <form action="{% url 'vote' forecast.uuid %}" method="post">
+          {% csrf_token %}
+          <div style="display: flex; align-items: center;gap: 5px;">
+            <input id="range" type="range" name="vote" min="0" max="100" value="0">
+            <p id="rangeVal">0%</p>
+          </div>
+          <input type="submit" value="Forecast">
+        </form>
+      {% endif %}
+      {% if forecast.ended and forecast.vote_set.all %}
+        <h3> Scores </h3>
+        <table>
+          <tr>
+            <th>User</th>
+            <th>Score</th>
+          </tr>
+          {% for user, score in forecast.scores %}
+            <tr>
+              <td>{{ user }}</td>
+              <td>{{ score }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+
+      {% if not forecast.private or forecast.ended %}
+      {% if forecast.vote_set.all %}
+      <h3> Predictions </h3>
+      <table>
+        <tr>
+          <th>User</th>
+          <th>Date</th>
+          <th>Guess</th>
+        </tr>
+        {% for vote in forecast.vote_set.all|dictsortreversed:"created_at" %}
+          <tr>
+            <td>{{ vote.user.username }}</td>
+            <td>{{ vote.created_at | date:'d-m-Y: H:i'}}</td>
+            <td>{{ vote.vote }}%</td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+      {% else %}
+      <div>
+      <div style="margin-top: 10px;" class="private">
+        private
+      </div>
+      <p>Predictions will be hidden until the forecast has ended.</p>
+      </div>
+      {% endif %}
+
+
+      </div>
+  </body>
+  <script defer>
+    const range = document.getElementById('range');
+    const rangeVal = document.getElementById('rangeVal');
+    range.addEventListener('input', () => {
+      rangeVal.innerHTML = range.value + '%';
+    });
+
+  </script>
+</html>
