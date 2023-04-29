@@ -25,7 +25,7 @@ def logout(request):
 
 def leaderboard(request):
     year = request.GET.get('year')
-    forecast_count = Forecast.objects.filter(outcome__isnull=False, deadline__year=year).count()
+    forecast_count = Forecast.objects.filter(outcome__isnull=False, deadline__year=year, hidden_to__isnull=True).count()
     if forecast_count == 0:
         return HttpResponseRedirect('/')
 
@@ -37,7 +37,7 @@ def leaderboard(request):
 
     other_years = Forecast.objects.values('deadline__year').distinct().exclude(deadline__year=year).filter(outcome__isnull=False).values_list('deadline__year', flat=True)
 
-    for forecast in Forecast.objects.filter(outcome__isnull=False, deadline__year=year):
+    for forecast in Forecast.objects.filter(outcome__isnull=False, deadline__year=year, hidden_to__isnull=True):
         for user, score in forecast.scores():
             for u in users:
                 if u['username'] == user:
