@@ -227,4 +227,25 @@ th, td {
   }
 }
 
+select[multiple] {
+  background-color: var(--main-color);
+  color: white;
+  height: auto;
+}
+
+.tooltip {
+  visibility: hidden;
+}
+
+@media (min-width: 600px) {
+  select[multiple] {
+    max-width: 200px;
+  }
+  .tooltip {
+    visibility: visible;
+    font-size: 12px;
+  }
+}
+
+
 tr:nth-child(even){background-color: var(--secondary-color)}

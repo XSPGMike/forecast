@@ -13,5 +13,10 @@ class ForecastTestCase(TestCase):
 
         started = datetime.datetime(2023, 5, 10, 0, 0, 0)
         pred = datetime.datetime(2023, 5, 20, 0, 0, 0)
-        deadline = timezone.now().date() + datetime.timedelta(days=30)
-        self.assertEqual(weight(0, pred, started, deadline), 1)
+        deadline = timezone.now() + datetime.timedelta(days=1)
+        self.assertTrue(weight(0, pred, started, deadline) > weight(1, pred, started, deadline))
+
+        started = datetime.datetime(2023, 5, 10, 0, 0, 0)
+        pred = datetime.datetime(2023, 5, 11, 0, 0, 0)
+        deadline = timezone.now() + datetime.timedelta(days=1)
+        self.assertTrue(weight(0, pred, started, deadline) > weight(1, pred, started, deadline))

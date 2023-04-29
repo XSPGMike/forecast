@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.models import User
+from django.db.models import Q
 from datetime import date
 from dotenv import load_dotenv
 from .models import Forecast, Vote
@@ -12,17 +14,19 @@ load_dotenv()
 
 # Create your views here.
 def index(request):
-    return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome=None), "year": date.today().year})
+    if request.user.is_authenticated:
+        return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(~Q(hidden_to__id__contains=request.user.id), outcome=None), "year": date.today().year})
+    return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome=None, hidden_to=None), "year": date.today().year})
 
 def archive(request):
     return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome__isnull=False), "year": date.today().year, "archive": True})
 
 def new(request):
     if(request.method == "GET"):
-        return render(request, "forecasts/new.html", {"today": str(date.today())})
+        return render(request, "forecasts/new.html", {"today": str(date.today()), "users": User.objects.filter(~Q(username=request.user.username))})
 
     deadline, title, description = request.POST["deadline"], request.POST["title"], request.POST["description"]
-
+    hidden_to = request.POST.getlist("hidden_to")
     # show the votes only after the forecast has ended
     private = bool(request.POST.get("is_private"))
 
@@ -33,10 +37,15 @@ def new(request):
                 title=title,
                 description=description,
                 created_by=request.user,
-                private=private
+                private=private,
             )
-            url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
-            send_discord_message(f'New forecast {forecast.title} created by {forecast.created_by.username}! Go to predict here: {url}')
+
+            if len(hidden_to) > 0:
+                forecast.hidden_to.set(hidden_to)
+            else:
+                url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
+                send_discord_message(f'New forecast {forecast.title} created by {forecast.created_by.username}! Go predict here: {url}')
+
             return HttpResponseRedirect("/forecasts")
         except ValueError:
             return render(request, "forecasts/new.html", {"error_message": "Invalid input."})

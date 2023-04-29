@@ -22,7 +22,7 @@ else
   mkdir ~/appdata/new_forecast/static
 fi
 
-git pull origin master
+git pull origin main  
 docker stop new_forecast
 docker rm new_forecast
 docker rmi new_forecast
