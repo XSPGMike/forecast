@@ -48,9 +48,9 @@ def new(request):
 
             return HttpResponseRedirect("/forecasts")
         except ValueError:
-            return render(request, "forecasts/new.html", {"error_message": "Invalid input."})
+            return render(request, "forecasts/new.html", {"error_message": "Invalid input.", "today": str(date.today()), "users": User.objects.filter(~Q(username=request.user.username))})
     else:
-        return render(request, "forecasts/new.html", {"error_message": "Invalid input."})
+        return render(request, "forecasts/new.html", {"error_message": "Invalid input.", "today": str(date.today()), "users": User.objects.filter(~Q(username=request.user.username))})
 
 def detail(request, uuid):
     if request.method == "GET":
