@@ -30,11 +30,13 @@
   </div>
 </div>
 
+{% if not archive %}
 <div class="sort">
   sort by:
   <a class="darker" href="/forecasts?sort=deadline">deadline</a>
   <a class="darker" href="/forecasts?sort=created_at">creation date</a>
 </div>
+{% endif %}
 
 <div class="outer">
 <ul>
