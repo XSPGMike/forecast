@@ -14,9 +14,13 @@ load_dotenv()
 
 # Create your views here.
 def index(request):
+    sort = request.GET.get("sort")
+    sort = sort if sort else "-created_at"
     if request.user.is_authenticated:
-        return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(~Q(hidden_to__id__contains=request.user.id), outcome=None), "year": date.today().year})
-    return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome=None, hidden_to=None), "year": date.today().year})
+        forecasts = Forecast.objects.filter(~Q(hidden_to__id__contains=request.user.id), outcome=None).order_by(f"{sort}")
+        return render(request, "forecasts/index.html", {"forecasts": forecasts, "year": date.today().year})
+    forecasts = Forecast.objects.filter(outcome=None).order_by(f"{sort}")
+    return render(request, "forecasts/index.html", {"forecasts": forecasts, "year": date.today().year})
 
 def archive(request):
     return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome__isnull=False), "year": date.today().year, "archive": True})

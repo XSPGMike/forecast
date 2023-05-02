@@ -247,5 +247,11 @@ select[multiple] {
   }
 }
 
+.sort {
+  padding: 12px;
+  padding-bottom: 4px;
+  color: var(--light-gray-color);
+}
+
 
 tr:nth-child(even){background-color: var(--secondary-color)}
