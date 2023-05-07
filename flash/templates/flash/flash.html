@@ -1,0 +1,19 @@
+{{ flash }}
+
+{%if user == flash.created_by %}
+    <button id="end">end</button>
+{%endif%}
+
+<script>
+    const auth = false
+    const wsUrl = '{{websocket}}'
+    const ws = new WebSocket(wsUrl)
+    ws.onopen = (e) => {
+        ws.send("{{token}}")
+    }
+
+    ws.onmessage = (e) => {
+        console.log(e)
+    }
+
+</script>

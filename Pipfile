@@ -8,6 +8,8 @@ django = "~=4.2"
 requests = "*"
 python-dotenv = "*"
 gunicorn = "*"
+django-sesame = "*"
+websockets = "*"
 
 [dev-packages]
 

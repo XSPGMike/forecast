@@ -22,5 +22,6 @@ urlpatterns = [
     path("", lambda request: HttpResponseRedirect("forecasts")),
     path("forecasts/", include("forecasts.urls")),
     path("users/", include("users.urls")),
+    path("flash/", include("flash.urls")),
     path("admin/", admin.site.urls)
 ]

@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "forecasts",
-    "users"
+    "users",
+    "flash"
 ]
 
 MIDDLEWARE = [
@@ -59,6 +60,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend"
+]
+
+SESAME_MAX_AGE = 30
 
 ROOT_URLCONF = "config.urls"
 
