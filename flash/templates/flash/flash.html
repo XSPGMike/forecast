@@ -1,4 +1,10 @@
 {{ flash }}
+<input type="range" min="1" max="10" value="5" id="range">
+<p>value: <span id="value">5</span></p>
+
+<p>connected:</p>
+<ul id="list">
+</ul>
 
 {%if user == flash.created_by %}
     <button id="end">end</button>
@@ -8,12 +14,64 @@
     const auth = false
     const wsUrl = '{{websocket}}'
     const ws = new WebSocket(wsUrl)
+    const users = new Set()
+    const state = {}
+
+    const range = document.getElementById('range')
+
+    range.addEventListener('input', (e) => {
+      document.getElementById('value').innerText = e.target.value
+      ws.send(JSON.stringify({
+        event: 'range',
+        value: e.target.value
+      }))
+    })
+
     ws.onopen = (e) => {
         ws.send("{{token}}")
     }
 
-    ws.onmessage = (e) => {
-        console.log(e)
+    ws.onmessage = ({data}) => {
+      const parsed = JSON.parse(data)
+      switch(parsed.event) {
+        case 'user_connected':
+          handleUserConnected(parsed.user)
+          break
+        case 'user_disconnected':
+          users.delete(parsed.user)
+          handleRange()
+          break
+        case 'range':
+          state[parsed.user] = parsed.value
+          handleRange()
+          break
+        case 'end':
+          window.location.reload()
+          break
+      }
     }
+
+    function handleUserConnected(user){
+      if(users.has(user)) return
+      users.add(user)
+      handleRange()
+    }
+
+    function handleRange(){
+      const list = document.getElementById('list')
+      list.innerHTML = ''
+      for(const user of users){
+        const li = document.createElement('li')
+        li.innerText = `${user}: ${state[user] || 5}`
+        list.appendChild(li)
+      }
+    }
+
+    document.getElementById("end").addEventListener("click", function(){
+        ws.send(JSON.stringify({
+            event: 'end'
+        }))
+        window.location.reload()
+    })
 
 </script>
