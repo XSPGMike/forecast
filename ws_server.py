@@ -17,7 +17,6 @@ async def handler(websocket):
     sesame = await websocket.recv()
     user = await asyncio.to_thread(get_user, sesame)
 
-
     if user is None:
         await websocket.close(1011, "authentication failed")
         return
@@ -54,7 +53,8 @@ async def handler(websocket):
                     }))
             if data["event"] == "end":
                 loop = asyncio.get_event_loop()
-                Flash.objects.filter(active=True).update(active=False, votes=json.dumps(game_state))
+                outcome = data["outcome"] == "y"
+                Flash.objects.filter(active=True).update(active=False, votes=json.dumps(game_state), outcome=outcome)
     finally:
         if websocket in [client["ws"] for client in connected_clients]:
             connected_clients.remove({"ws": websocket, "user": user})

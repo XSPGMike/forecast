@@ -1,77 +1,130 @@
-{{ flash }}
-<input type="range" min="1" max="10" value="5" id="range">
-<p>value: <span id="value">5</span></p>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static 'flash/flash.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flash forecast</title>
+  </head>
+<body>
+  <div id="main" class="main">
+    {{ flash }}
+  </div>
+  <input type="range" min="0" max="10" value="5" id="range">
 
-<p>connected:</p>
-<ul id="list">
-</ul>
+  {%if user == flash.created_by %}
+  <div>
+    <button id="y">yes</button>
+    <button id="n">no</button>
+  </div>
+  {%endif%}
 
-{%if user == flash.created_by %}
-    <button id="end">end</button>
-{%endif%}
-
+</body>
+</html>
 <script>
-    const auth = false
-    const wsUrl = '{{websocket}}'
-    const ws = new WebSocket(wsUrl)
-    const users = new Set()
-    const state = {}
+  const users = []
+  const state = {}
+  let latestDeg = 0
+  let mirrorFlag = 1
 
-    const range = document.getElementById('range')
+  function createCircle(l) {
+    const div = document.createElement('div')
+    div.classList.add('circle')
+    div.style.transform = `rotate(${latestDeg}deg) translateX(125px)`
 
-    range.addEventListener('input', (e) => {
-      document.getElementById('value').innerText = e.target.value
-      ws.send(JSON.stringify({
-        event: 'range',
-        value: e.target.value
-      }))
+    const inner = document.createElement('div')
+    inner.innerText = l
+    inner.style.transform = `rotate(-${latestDeg}deg)`
+    div.appendChild(inner)
+
+    latestDeg += mirrorFlag ? 180 : 45
+    mirroFlag = !mirrorFlag
+
+    document.getElementById('main').appendChild(div)
+    return div
+  }
+
+  function userConnected(user){
+    if(users.find(u => u.user === user)) return
+    users.push({
+      user,
+      avatar: createCircle(user.slice(0, 1).toUpperCase())
     })
+  }
 
-    ws.onopen = (e) => {
-        ws.send("{{token}}")
+  function userDisconnected(user){
+    const idx = users.findIndex(u => u.user === user)
+    if(idx === -1) return
+    users[idx].avatar.remove()
+    users.splice(idx, 1)
+  }
+
+  function receivedRange(){
+    for(const user of users){
+      user.avatar.innerHTML = state[user.user]
     }
+  }
 
-    ws.onmessage = ({data}) => {
-      const parsed = JSON.parse(data)
-      switch(parsed.event) {
-        case 'user_connected':
-          handleUserConnected(parsed.user)
-          break
-        case 'user_disconnected':
-          users.delete(parsed.user)
-          handleRange()
-          break
-        case 'range':
-          state[parsed.user] = parsed.value
-          handleRange()
-          break
-        case 'end':
-          window.location.reload()
-          break
-      }
-    }
-
-    function handleUserConnected(user){
-      if(users.has(user)) return
-      users.add(user)
-      handleRange()
-    }
-
-    function handleRange(){
-      const list = document.getElementById('list')
-      list.innerHTML = ''
-      for(const user of users){
-        const li = document.createElement('li')
-        li.innerText = `${user}: ${state[user] || 5}`
-        list.appendChild(li)
-      }
-    }
-
-    document.getElementById("end").addEventListener("click", function(){
-        ws.send(JSON.stringify({
-            event: 'end'
-        }))
+  function handleWs({data}){
+    const parsed = JSON.parse(data)
+    switch(parsed.event) {
+      case 'user_connected':
+        userConnected(parsed.user)
+        break
+      case 'user_disconnected':
+        userDisconnected(parsed.user)
+        break
+      case 'range':
+        state[parsed.user] = parsed.value
+        receivedRange()
+        break
+      case 'end':
         window.location.reload()
+        break
+    }
+  }
+
+  const wsUrl = '{{websocket}}'
+  const ws = new WebSocket(wsUrl)
+
+  ws.onerror = (e) => {
+    console.log(e)
+  }
+
+  ws.onopen = (e) => {
+    ws.send("{{token}}")
+    createCircle('{{user}}'.slice(0, 1).toUpperCase())
+  }
+
+  ws.onmessage = handleWs
+
+  const range = document.getElementById('range')
+  range.addEventListener('input', (e) => {
+    ws.send(JSON.stringify({
+      event: 'range',
+      value: e.target.value
+    }))
+  })
+
+  const y = document.getElementById("y")
+  const n = document.getElementById("n")
+
+  if(y && n){
+    y.addEventListener("click", function(){
+      ws.send(JSON.stringify({
+        event: 'end',
+        outcome: 'y'
+      }))
+      window.location.reload()
     })
+    n.addEventListener("click", function(){
+      ws.send(JSON.stringify({
+        event: 'end',
+        data: 'n'
+      }))
+      window.location.reload()
+    })
+  }
 
 </script>
