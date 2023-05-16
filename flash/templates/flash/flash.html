@@ -85,7 +85,7 @@
     }
   }
 
-  const wsUrl = '{{websocket}}'
+  const wsUrl = 'ws://{{request.get_host}}/ws/flash'
   const ws = new WebSocket(wsUrl)
 
   ws.onerror = (e) => {

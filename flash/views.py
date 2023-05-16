@@ -21,5 +21,5 @@ def index(request):
     flash = Flash.objects.filter(active=True).first()
     if flash:
         token = get_token(request.user)
-        return render(request, "flash/flash.html", { "flash": flash , "websocket": "ws://192.168.0.150:8888", "token": token})
+        return render(request, "flash/flash.html", { "flash": flash , "token": token})
     return FlashCreateView.as_view()(request)

@@ -1,10 +1,13 @@
 import asyncio
 import django
 import websockets
+import os
 import json
+from django.contrib.auth import get_user
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
-from sesame.utils import get_user
 from flash.models import Flash
+
 
 connected_clients = []
 game_state = {}
@@ -12,9 +15,9 @@ game_state = {}
 def other_clients(websocket):
     return [client for client in connected_clients if not client["ws"].closed and client["ws"] is not websocket]
 
+
 async def handler(websocket):
     global game_state
-    sesame = await websocket.recv()
     user = await asyncio.to_thread(get_user, sesame)
 
     if user is None:
@@ -61,10 +64,50 @@ async def handler(websocket):
         for client in other_clients(websocket):
             await client["ws"].send(json.dumps({"event": "user_disconnected", "user": user.username }))
 
-async def main():
-    async with websockets.serve(handler, "0.0.0.0", 8888):
-        await asyncio.Future()
+async def close_ws(send, code):
+    await send({
+        'type': 'websocket.close',
+        'code': code if code else 1000
+    })
 
+async def new_handler(event, send):
+    global connected_clients
+    global game_state
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    if event['type'] == 'websocket.connect':
+        await send({
+            'type': 'websocket.accept'
+        })
+
+    if event['type'] == 'websocket.disconnect':
+        return True
+
+    if event['type'] == 'websocket.receive':
+        if user is None:
+            await close_ws(send, 1011)
+            return True
+
+        if len(connected_clients) == 0:
+            game_state = {user.username: 5}
+        else:
+            game_state[user.username] = 5
+
+        if user in connected_clients:
+            print('duplicate connection')
+        else:
+            connected_clients.append(user)
+
+async def websocket_application(scope, receive, send):
+    while True:
+        event = await receive()
+        if event['type'] == 'lifespan.startup':
+            await send({'type': 'lifespan.startup.complete'})
+        elif event['type'] == 'lifespan.shutdown':
+            await send({'type': 'lifespan.shutdown.complete'})
+
+        if scope.get('path') != '/ws/flash':
+            await close_ws(send, 1000)
+            break
+
+        if await new_handler(event, send):
+            break
