@@ -3,11 +3,10 @@ import django
 import websockets
 import os
 import json
-from django.contrib.auth import get_user
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
+from sesame.utils import get_user
 from flash.models import Flash
-
 
 connected_clients = []
 game_state = {}
@@ -73,6 +72,7 @@ async def close_ws(send, code):
 async def new_handler(event, send):
     global connected_clients
     global game_state
+    data = None
 
     if event['type'] == 'websocket.connect':
         await send({
@@ -83,6 +83,17 @@ async def new_handler(event, send):
         return True
 
     if event['type'] == 'websocket.receive':
+        try:
+            data = json.loads(event['text'])
+            if 'token' not in data:
+                raise Exception('no token')
+        except:
+            await close_ws(send, 1003)
+            return True
+
+        user = await asyncio.to_thread(get_user, data['token'])
+        print(user)
+
         if user is None:
             await close_ws(send, 1011)
             return True
@@ -100,6 +111,7 @@ async def new_handler(event, send):
 async def websocket_application(scope, receive, send):
     while True:
         event = await receive()
+
         if event['type'] == 'lifespan.startup':
             await send({'type': 'lifespan.startup.complete'})
         elif event['type'] == 'lifespan.shutdown':

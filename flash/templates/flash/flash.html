@@ -93,7 +93,7 @@
   }
 
   ws.onopen = (e) => {
-    ws.send("{{token}}")
+    ws.send(JSON.stringify({token: '{{token}}'}))
     createCircle('{{user}}'.slice(0, 1).toUpperCase())
   }
 
