@@ -5,4 +5,5 @@ RUN pip install pipenv && pipenv install --system
 COPY . .
 COPY gunicorn.conf.py .
 EXPOSE 8000
-CMD ["gunicorn", "config.wsgi:application", "-c", "gunicorn.conf.py"]
+RUN python manage.py collectstatic --noinput
+CMD ["gunicorn", "config.asgi:application", "-c", "gunicorn.conf.py", "-k", "uvicorn.workers.UvicornWorker"]

@@ -19,7 +19,6 @@ else
   mkdir ~/appdata
   mkdir ~/appdata/new_forecast
   touch ~/appdata/new_forecast/db.sqlite3
-  mkdir ~/appdata/new_forecast/static
 fi
 
 git pull origin main  
@@ -33,10 +32,8 @@ docker run \
 	--name new_forecast \
 	--restart always \
 	-v ~/appdata/new_forecast/db.sqlite3:/app/db.sqlite3 \
-	-v ~/appdata/new_forecast/static:/app/static \
 	-p 8000:8000 \
 	new_forecast
 
 docker exec new_forecast python manage.py makemigrations
 docker exec new_forecast python manage.py migrate
-docker exec new_forecast python manage.py collectstatic --noinput
