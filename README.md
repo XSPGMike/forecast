@@ -21,9 +21,9 @@ $ python manage.py migrate
 $ python manage.py createsuperuser
 ```
 
-4. Start the development server
+4. Start the uvicorn server
 ```
-$ python3 manage.py runserver
+$ ./dev.sh
 ```
 
 The web app should be available on port 8000
