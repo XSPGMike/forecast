@@ -87,7 +87,8 @@
     }
   }
 
-  const wsUrl = 'ws://{{request.get_host}}/ws/flash'
+  const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws'
+  const wsUrl = `${wsProto}://{{request.get_host}}/ws/flash`
   const ws = new WebSocket(wsUrl)
 
   ws.onerror = (e) => {
