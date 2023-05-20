@@ -11,14 +11,16 @@
   <div id="main" class="main">
     {{ flash }}
   </div>
-  <input type="range" min="0" max="10" value="5" id="range">
 
-  {%if user == flash.created_by %}
-  <div>
-    <button id="y">yes</button>
-    <button id="n">no</button>
+  <div class="container">
+    {%if user == flash.created_by %}
+      <div class="button-container">
+        <button id="y">yes</button>
+        <button id="n">no</button>
+      </div>
+    {%endif%}
+  <input type="range" min="0" max="10" value="5" id="range">
   </div>
-  {%endif%}
 
 </body>
 </html>
@@ -80,6 +82,7 @@
         receivedRange()
         break
       case 'end':
+        console.log('ended')
         window.location.reload()
         break
     }
@@ -116,14 +119,12 @@
         event: 'end',
         outcome: 'y'
       }))
-      window.location.reload()
     })
     n.addEventListener("click", function(){
       ws.send(JSON.stringify({
         event: 'end',
-        data: 'n'
+        outcome: 'n'
       }))
-      window.location.reload()
     })
   }
 

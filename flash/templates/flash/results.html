@@ -1,0 +1,12 @@
+<a href="/">Back to home</a>
+{% if flash.outcome %}
+<p> it happened! </p>
+{% else %}
+<p> it didn't happen! </p>
+{% endif %}
+
+<ul>
+{% for user, value in results %}
+<li> {{ user }}: {{ value }} </li>
+{% endfor %}
+</ul>

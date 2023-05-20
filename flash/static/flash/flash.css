@@ -47,10 +47,6 @@ body {
 }
 
 input[type="range"] {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
   -webkit-appearance: none;
   width: 270px;
   height: 10px;
@@ -58,4 +54,39 @@ input[type="range"] {
   background: var(--gray-color);
   outline: none;
   opacity: 0.7;
+}
+
+.container {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 270px;
+  margin-bottom: 50px;
+}
+
+button {
+  border: none;
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  outline: none;
+  font-weight: bold;
+}
+
+#y:hover {
+  background-color: var(--highlight-color);
+  color: black;
+}
+
+#n:hover {
+  background-color: var(--red-color);
 }
