@@ -1,5 +1,15 @@
+<head>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'flash/flash.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flash forecast</title>
+</head>
+<div style="display: flex; flex-direction: column; gap: 10px;">
+  <a href="/" style="color: var(--light-gray-color);">back home</a>
+  <a style="color: var(--highlight-color);" href="archive">flash archive</a>
+</div>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="new">
+    <input type="submit" value="flash!">
 </form>

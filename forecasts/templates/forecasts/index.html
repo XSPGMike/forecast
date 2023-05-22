@@ -12,7 +12,10 @@
   <h1>Forecast Legends</h1>
   <div>
   {% if user.is_authenticated %}
+  <div style="display: flex; gap: 10px; align-items: center;">
   <a class="author" href="{% url 'new' %}">create forecast</a>
+  <a class="flash" href="/flash">flash</a>
+  </div>
     <div class="links">
       <a class="gold" href="/users/leaderboard?year={{ year }}">leaderboard</a>
       {% if archive %}

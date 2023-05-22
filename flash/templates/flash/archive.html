@@ -1,0 +1,23 @@
+<head>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'forecasts/common.css' %}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flash archive</title>
+</head>
+<body>
+<div class="container">
+<a href="/" style="color: var(--light-gray-color);">back home</a>
+<h2 style="color: var(--highlight-color)">Flash archive</h2>
+<table style="color: white;">
+<th>Flash</th>
+<th>Created at</th>
+{% for flash in object_list %}
+<tr>
+  <td><a style="color: var(--highlight-color);" href="{{ flash.uuid }}">{{ flash.title }}</a></td>
+  <td>{{ flash.created_at }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+</body>

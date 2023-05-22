@@ -253,5 +253,26 @@ select[multiple] {
   color: var(--light-gray-color);
 }
 
+.flash {
+  background-color: var(--highlight-color);
+  max-width: fit-content;
+  animation: flash 1s infinite;
+  padding: 4px;
+  text-decoration: none;
+  color: black;
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 
 tr:nth-child(even){background-color: var(--secondary-color)}

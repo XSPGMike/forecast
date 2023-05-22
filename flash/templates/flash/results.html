@@ -1,12 +1,25 @@
-<a href="/">Back to home</a>
+<head>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'forecasts/common.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<div class="container">
+<a style="color: var(--light-gray-color)" href="/">Back to home</a>
 {% if flash.outcome %}
-<p> it happened! </p>
+<p style="color: var(--highlight-color)"> it happened! </p>
 {% else %}
-<p> it didn't happen! </p>
+<p style="color: var(--red-color)"> it didn't happen! </p>
 {% endif %}
 
-<ul>
+<table style="color: white;">
+<th>user</th>
+<th>voted</th>
 {% for user, value in results %}
-<li> {{ user }}: {{ value }} </li>
+<tr>
+<td> {{ user }} </td>
+<td> {{ value }} </td>
+</tr>
 {% endfor %}
-</ul>
+</table>
+
+</div>

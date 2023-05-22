@@ -20,6 +20,22 @@ async def close_ws(send, code):
 async def send_ws(ws, data):
     await ws({'type': 'websocket.send', 'text': json.dumps(data)})
 
+async def websocket_application(scope, receive, send):
+    while True:
+        event = await receive()
+
+        if event['type'] == 'lifespan.startup':
+            await send({'type': 'lifespan.startup.complete'})
+        elif event['type'] == 'lifespan.shutdown':
+            await send({'type': 'lifespan.shutdown.complete'})
+
+        if scope.get('path') != '/ws/flash':
+            await close_ws(send, 1000)
+            break
+
+        if await handler(event, send):
+            break
+
 async def handler(event, send):
     global connected_clients
     global game_state
@@ -55,15 +71,16 @@ async def handler(event, send):
                 await close_ws(send, 1011)
                 return True
 
-            if len(connected_clients) == 0:
+            if len(connected_clients) == 0 and user.username not in game_state:
                 game_state = {user.username: 5}
-            else:
+            elif user.username not in game_state:
                 game_state[user.username] = 5
 
             if user not in connected_clients:
                 for curr in connected_clients:
-                    await send({'type': 'websocket.send', 'text': json.dumps({'event': 'user_connected', 'user': curr["user"].username})})
-                    await curr["ws"]({'type': 'websocket.send', 'text': json.dumps({'event': 'user_connected', 'user': user.username})})
+                    await send({'type': 'websocket.send', 'text': json.dumps({'event': 'user_connected', 'user': curr["user"].username, 'score': game_state[curr["user"].username]})})
+                    await curr["ws"]({'type': 'websocket.send', 'text': json.dumps({'event': 'user_connected', 'user': user.username, 'score': game_state[user.username]})})
+                await send({'type': 'websocket.send', 'text': json.dumps({'event': 'range', 'user': user.username, 'value': game_state[user.username]})})
                 connected_clients.append({"ws": send, "user": user})
         else:
             data = json.loads(event['text'])
@@ -80,19 +97,3 @@ async def handler(event, send):
                     await client["ws"]({'type': 'websocket.send', 'text': json.dumps({'event': 'end'})})
                 connected_clients = []
                 game_state = {}
-
-async def websocket_application(scope, receive, send):
-    while True:
-        event = await receive()
-
-        if event['type'] == 'lifespan.startup':
-            await send({'type': 'lifespan.startup.complete'})
-        elif event['type'] == 'lifespan.shutdown':
-            await send({'type': 'lifespan.shutdown.complete'})
-
-        if scope.get('path') != '/ws/flash':
-            await close_ws(send, 1000)
-            break
-
-        if await handler(event, send):
-            break

@@ -8,6 +8,10 @@
     <title>Flash forecast</title>
   </head>
 <body>
+  <div class="copy-to-clipboard">
+    <input type="text" value="{{request.build_absolute_uri}}" id="copy-input" readonly>
+    <button id="copy-button"><img id="share-icon" src="https://img.icons8.com/ios/50/000000/copy.png"/></button>
+  </div>
   <div id="main" class="main">
     {{ flash }}
   </div>
@@ -30,29 +34,47 @@
   let latestDeg = 0
   let mirrorFlag = 1
 
-  function createCircle(l) {
+  function createCircle(l, user) {
     const div = document.createElement('div')
     div.classList.add('circle')
     div.style.transform = `rotate(${latestDeg}deg) translateX(125px)`
 
+    const wrapper = document.createElement('div')
+    wrapper.style.transform = `rotate(-${latestDeg}deg)`
+    wrapper.style.display = 'flex'
+    wrapper.style.flexDirection = 'column'
+    wrapper.style.alignItems = 'center'
+    wrapper.style.justifyContent = 'center'
+
     const inner = document.createElement('div')
+    inner.id = "score"
+    user.latestDeg = latestDeg
     inner.innerText = l
-    inner.style.transform = `rotate(-${latestDeg}deg)`
-    div.appendChild(inner)
+    wrapper.appendChild(inner)
+
+    const name = document.createElement('div')
+    name.style.fontSize = '10px'
+    name.innerText = user.user
+    wrapper.appendChild(name)
 
     latestDeg += mirrorFlag ? 180 : 45
-    mirroFlag = !mirrorFlag
+    mirrorFlag = !mirrorFlag
 
+    div.appendChild(wrapper)
     document.getElementById('main').appendChild(div)
     return div
   }
 
-  function userConnected(user){
-    if(users.find(u => u.user === user)) return
+  function userConnected(user, score){
+    if(users.find(u => u.user === user)){
+      state[user] = score
+      return
+    }
     users.push({
-      user,
-      avatar: createCircle(user.slice(0, 1).toUpperCase())
+      user
     })
+    state[user] = score
+    recalculatePlayers()
   }
 
   function userDisconnected(user){
@@ -60,25 +82,44 @@
     if(idx === -1) return
     users[idx].avatar.remove()
     users.splice(idx, 1)
+    recalculatePlayers()
   }
 
   function receivedRange(){
     for(const user of users){
-      user.avatar.innerHTML = state[user.user]
+      if(state[user.user] === undefined) continue
+      user.avatar.lastChild.firstChild.innerText = state[user.user]
     }
+  }
+
+  function recalculatePlayers(){
+    for(const { avatar } of users){
+      avatar?.remove()
+    }
+
+    latestDeg = 0
+    mirrorFlag = 1
+
+    for(const user of users){
+      user.avatar = createCircle(user.user.slice(0, 1).toUpperCase(), user)
+    }
+    receivedRange()
   }
 
   function handleWs({data}){
     const parsed = JSON.parse(data)
     switch(parsed.event) {
       case 'user_connected':
-        userConnected(parsed.user)
+        userConnected(parsed.user, parsed?.score)
         break
       case 'user_disconnected':
         userDisconnected(parsed.user)
         break
       case 'range':
         state[parsed.user] = parsed.value
+        if(parsed.user === '{{user}}'){
+          range.value = parsed.value
+        }
         receivedRange()
         break
       case 'end':
@@ -97,13 +138,17 @@
 
   ws.onopen = (e) => {
     ws.send(JSON.stringify({token: '{{token}}'}))
-    createCircle('{{user}}'.slice(0, 1).toUpperCase())
+    users.push({user: '{{user}}'})
+    circle = createCircle('{{user}}'.slice(0, 1).toUpperCase(), users.at(-1))
+    users.at(-1).avatar = circle
   }
 
   ws.onmessage = handleWs
 
   const range = document.getElementById('range')
   range.addEventListener('input', (e) => {
+    state['{{user}}'] = e.target.value
+    receivedRange()
     ws.send(JSON.stringify({
       event: 'range',
       value: e.target.value
@@ -127,5 +172,18 @@
       }))
     })
   }
+
+  const copyButton = document.getElementById("copy-button")
+  const copyInput = document.getElementById("copy-input")
+
+  copyButton.addEventListener("click", function(){
+    copyInput.select()
+    copyInput.setSelectionRange(0, 99999)
+    document.execCommand("copy")
+    document.getElementById("share-icon").src = "https://img.icons8.com/ios/50/000000/checkmark.png"
+    setTimeout(function(){
+      document.getElementById("share-icon").src = "https://img.icons8.com/ios/50/000000/copy.png"
+    }, 1000)
+  })
 
 </script>
