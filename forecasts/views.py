@@ -82,7 +82,7 @@ def end(request, uuid):
         forecast.outcome = outcome
         forecast.save()
         url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
-        send_discord_message(f'Forecast {forecast.title} (created by {forecast.created_by.username}) has ended with the following outcome: {"It happened!" if forecast.outcome == True else "It did not happen!"}, go check results at {url}')
+        send_discord_message(f'Forecast {forecast.title} (created by {forecast.created_by.username}) has ended with the following outcome: {"It happened!" if outcome == True else "It did not happen!"}, go check results at {url}')
         return HttpResponseRedirect("/forecasts")
 
     return HttpResponseRedirect("/forecasts")
