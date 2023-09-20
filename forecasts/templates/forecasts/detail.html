@@ -44,6 +44,9 @@
             <input type="submit" value="End">
           </form>
         {% endif %}
+        {% if error_message %}
+          <p class="error">{{ error_message }}</p>
+        {% endif %}
       {% elif user.is_authenticated %}
         <form action="{% url 'vote' forecast.uuid %}" method="post">
           {% csrf_token %}

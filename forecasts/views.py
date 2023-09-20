@@ -65,9 +65,9 @@ def detail(request, uuid):
 def vote(request, uuid):
     if request.method == "POST":
         forecast = get_object_or_404(Forecast, uuid=uuid)
-        vote = request.POST["vote"]
+        vote = request.POST.get("vote")
         if not vote:
-            return render(request, "forecasts/detail.html", {"error_message": "Invalid input."})
+            return render(request, "forecasts/detail.html", {"error_message": "Please insert a valid vote!", "forecast": forecast})
         forecast.vote_set.create(vote=vote, user=request.user)
         return HttpResponseRedirect("/forecasts")
 
@@ -76,9 +76,10 @@ def vote(request, uuid):
 def end(request, uuid):
     if request.method == "POST":
         forecast = get_object_or_404(Forecast, uuid=uuid, created_by=request.user)
-        outcome = request.POST["outcome"]
+        outcome = request.POST.get("outcome")
         if not outcome:
-            return render(request, "forecasts/detail.html", {"error_message": "Invalid input."})
+            return render(request, "forecasts/detail.html", {"error_message": "Please select an outcome!", "forecast": forecast})
+        outcome = bool(int(outcome))
         forecast.outcome = outcome
         forecast.save()
         url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
