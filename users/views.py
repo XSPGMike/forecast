@@ -11,9 +11,12 @@ def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        redirect = request.POST.get('next')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
+            if redirect is not None:
+                return HttpResponseRedirect(redirect)
             return HttpResponseRedirect('/')
         else:
             return render(request, 'users/login.html', {'error': 'Invalid username or password'})

@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
 from datetime import date
@@ -25,6 +26,7 @@ def index(request):
 def archive(request):
     return render(request, "forecasts/index.html", {"forecasts": Forecast.objects.filter(outcome__isnull=False), "year": date.today().year, "archive": True})
 
+@login_required(login_url="/users/login")
 def new(request):
     if(request.method == "GET"):
         return render(request, "forecasts/new.html", {"today": str(date.today()), "users": User.objects.filter(~Q(username=request.user.username))})

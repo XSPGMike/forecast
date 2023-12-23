@@ -24,14 +24,14 @@ class ArchiveListView(ListView):
     context_object_name = "flashes"
     paginate_by = 10
 
-@login_required
+@login_required(login_url="/users/login")
 def index(request):
     flash = Flash.objects.filter(active=True).first()
     if flash:
         return redirect(f"/flash/{flash.uuid}")
     return FlashCreateView.as_view()(request)
 
-@login_required
+@login_required(login_url="/users/login")
 def flash(request, uuid):
     flash = Flash.objects.filter(uuid=uuid).first()
 

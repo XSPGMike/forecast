@@ -30,6 +30,14 @@ body {
   color: white;
 }
 
+.main > .flash {
+  width: 50%;
+  word-wrap: break-word;
+  max-height: calc(100% - 80px);
+  overflow-y: scroll;
+  text-align: center;
+}
+
 .circle {
   position: absolute;
   left: calc(50% - 30px);

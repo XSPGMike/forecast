@@ -12,10 +12,13 @@
   {% if error %}
     <p class="red">{{ error }}</p>
   {% endif %}
-<form action="{% url 'login' %}" method="post">
+  <form action="{% url 'login' %}" method="post">
   {% csrf_token %}
   <input type="text" name="username" placeholder="username"></input>
   <input type="password" name="password" placeholder="password"></input>
+  {% if request.GET.next %}
+  <input type="hidden" name="next" value="{{request.GET.next}}"></input>
+  {% endif %}
   <input type="submit" value="Login"></input>
 </form>
 </div>
