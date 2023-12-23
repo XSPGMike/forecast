@@ -14,14 +14,16 @@ $ python3 -m pip install pipenv
 $ python3 -m pipenv install
 ```
 
-3. Migrate the database and create the superuser
+3. Copy the .env.example file and edit it according to your setup
+
+4. Migrate the database and create the superuser
 ```
 $ python3 -m pipenv shell
 $ python manage.py migrate
 $ python manage.py createsuperuser
 ```
 
-4. Start the uvicorn server
+5. Start the uvicorn server
 ```
 $ ./dev.sh
 ```

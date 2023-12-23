@@ -47,7 +47,12 @@ def new(request):
             if len(hidden_to) > 0:
                 forecast.hidden_to.set(hidden_to)
             else:
-                url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
+                url = f'http://localhost:8000/forecasts/{forecast.uuid}'
+                if os.environ.get("PROD"):
+                    if url := os.environ.get("MAIN_URL"):
+                        url = f'{url}/forecasts/{forecast.uuid}'
+                    else:
+                        raise Exception("Missing MAIN_URL in .env file")
                 send_discord_message(f'New forecast {forecast.title} created by {forecast.created_by.username}! Go predict here: {url}')
 
             return HttpResponseRedirect("/forecasts")
@@ -82,8 +87,15 @@ def end(request, uuid):
         outcome = bool(int(outcome))
         forecast.outcome = outcome
         forecast.save()
-        url = f'http://localhost:8000/forecasts/{forecast.uuid}' if not os.environ.get("PROD") else f'https://forecast.archiviazzo.ninja/forecasts/{forecast.uuid}'
-        send_discord_message(f'Forecast {forecast.title} (created by {forecast.created_by.username}) has ended with the following outcome: {"It happened!" if outcome == True else "It did not happen!"}, go check results at {url}')
+
+        url = f'http://localhost:8000/forecasts/{forecast.uuid}'
+        if os.environ.get("PROD"):
+            if url := os.environ.get("MAIN_URL"):
+                url = f'{url}/forecasts/{forecast.uuid}'
+            else:
+                raise Exception("Missing MAIN_URL in .env file")
+        send_discord_message(f'New forecast {forecast.title} created by {forecast.created_by.username}! Go predict here: {url}')
+
         return HttpResponseRedirect("/forecasts")
 
     return HttpResponseRedirect("/forecasts")

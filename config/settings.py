@@ -29,13 +29,20 @@ SECRET_KEY = "django-insecure-xmz799-k#lq@144)a_wibyozl1g$(+o%#8-s8b7p_vy#1et13s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.0.150", "localhost", "forecast.archiviazzo.ninja"]
+if os.environ.get("ALLOWED_HOSTS") is not None:
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(' ')
+else:
+    raise Exception("Missing ALLOWED_HOSTS in .env")
+
 CSRF_TRUSTED_ORIGINS = []
 
 if os.environ.get("PROD"):
     DEBUG = False
     SECRET_KEY = os.environ.get("SECRET_KEY")
-    CSRF_TRUSTED_ORIGINS = ["http://forecast.archiviazzo.ninja", "https://forecast.archiviazzo.ninja"]
+    if os.environ.get("CSRF_TRUSTED_ORIGINS") is not None:
+        CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(' ')
+    else:
+        raise Exception("Missing CSRF_TRUSTED_ORIGINS in .env")
 
 # Application definition
 
