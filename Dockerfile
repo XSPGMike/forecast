@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster
+FROM python:3.10.13-bullseye
 WORKDIR /app
 COPY Pipfile Pipfile.lock ./
 RUN pip install pipenv && pipenv install --system
